@@ -16,8 +16,9 @@ class Cluster {
 public:
     Point center;
     vector<Point> points;
-	int dimensions;
+    int dimensions;
 
+    //constructor
     Cluster(const Point& center) : center(center), dimensions(center.coords.size()) {}
 
     void addPoint(const Point& p) {
@@ -28,6 +29,7 @@ public:
         points.clear();
     }
 
+    //updates center of cluster
     void update() {
         vector<double> sum(dimensions, 0);
         for (const auto& p : points) {
@@ -98,6 +100,7 @@ vector<Cluster> kmeans(const vector<Point>& points, int k, int maxIterations) {
         if (converged) {
             break;
         }
+	//clear out clusters and reassin points
         for (auto& c : clusters) {
             c.clear();
         }
