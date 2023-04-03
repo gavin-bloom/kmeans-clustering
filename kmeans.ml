@@ -23,7 +23,8 @@ let find_nearest_cluster point clusters =
   | Some cluster -> cluster
   | None -> failwith "No clusters"
 
-let rec update_clusters points clusters =
+let rec update_clusters points clusters iterations max_iterations =
+  (*clear clusters and reassing points*)
   List.iter (fun cluster -> cluster.points <- []) clusters;
   List.iter (fun point ->
     let nearest_cluster = find_nearest_cluster point clusters in
@@ -35,6 +36,7 @@ let rec update_clusters points clusters =
     match cluster.points with
     | [] -> ()
     | _ ->
+      (*calculates new center for clusters*)
       let dim = Array.length old_center in
       let new_center = Array.make dim 0.0 in
       List.iter (fun point ->
@@ -46,11 +48,12 @@ let rec update_clusters points clusters =
       cluster.center <- new_center;
       if not (old_center = new_center) then converged := false
   ) clusters;
-  if not !converged then update_clusters points clusters
+  (*loop if not converged*)
+  if not !converged && iterations + 1 < max_iterations then update_clusters points clusters (iterations + 1) max_iterations
 
 let kmeans points k max_iterations =
   let clusters = Array.make k { center = [||]; points = [] } in
-  (*let dim = Array.length points.(0) in *)
+  (*init clusters with random points*)
   for i = 0 to k - 1 do
     clusters.(i) <- { center = Array.copy points.(i); points = [] }
   done;
@@ -58,7 +61,7 @@ let kmeans points k max_iterations =
     let random_cluster = clusters.(Random.int k) in
     random_cluster.points <- points.(i) :: random_cluster.points
   done;
-  update_clusters (Array.to_list points) (Array.to_list clusters);
+  update_clusters (Array.to_list points) (Array.to_list clusters) 0 max_iterations;
   Array.to_list clusters
 
 let () =
